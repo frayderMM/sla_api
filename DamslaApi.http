@@ -1,0 +1,6 @@
+@DamslaApi_HostAddress = http://localhost:5149
+
+GET {{DamslaApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -142,4 +142,17 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Endpoint raíz con información de la API
+app.MapGet("/", () =>
+    Results.Json(new {
+        api = "DAM SLA API",
+        status = "running",
+        version = "1.0.0",
+        environment = app.Environment.EnvironmentName,
+        swagger = "/swagger/index.html",
+        timestamp = DateTime.UtcNow
+    })
+);
+
 app.Run();

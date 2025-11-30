@@ -9,9 +9,12 @@ using DamslaApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar DbContext con PostgreSQL (Aurora)
+// Configurar DbContext con PostgreSQL (Aurora) - Variable de entorno para Render
+var connectionString = builder.Configuration.GetValue<string>("CONN_STR") ?? 
+                       builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<DamslaDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(connectionString)
 );
 
 // Registrar servicios
@@ -33,17 +36,15 @@ builder.Services.AddScoped<DashboardPrincipalService>();
 // Registrar tarea en segundo plano para alertas automáticas
 builder.Services.AddHostedService<BackgroundAlertTask>();
 
-// Configurar CORS para aplicaciones móviles
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+// Configurar CORS - Permitir todo para Render y móviles
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
 // Agregar controladores y Swagger
@@ -130,14 +131,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configurar pipeline HTTP
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger habilitado en todos los entornos para Render
+app.UseSwagger();
+app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins);
+// No usar HTTPS redirection en Render (Render maneja SSL)
+// app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

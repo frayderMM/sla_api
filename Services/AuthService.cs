@@ -54,5 +54,23 @@ namespace DamslaApi.Services
             await _db.SaveChangesAsync();
             return nuevo;
         }
+
+        public async Task<bool> ChangePassword(int userId, ChangePasswordDto dto)
+        {
+            var user = await _db.Usuarios.FindAsync(userId);
+            
+            if (user == null)
+                return false;
+
+            // Verificar que la contraseña actual sea correcta
+            if (!PasswordHasher.Verify(dto.CurrentPassword, user.Password_Hash))
+                return false;
+
+            // Actualizar la contraseña
+            user.Password_Hash = PasswordHasher.Hash(dto.NewPassword);
+            await _db.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

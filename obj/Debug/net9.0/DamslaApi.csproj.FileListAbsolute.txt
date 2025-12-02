@@ -200,3 +200,4 @@ C:\Users\mezam\OneDrive\Documentos\ESAN\2025-2\Desarrollo de aplicaciones movile
 C:\Users\mezam\OneDrive\Documentos\ESAN\2025-2\Desarrollo de aplicaciones moviles\api_mobile\DamslaApi\bin\Debug\net9.0\runtimes\win-x86\native\libstdc++-6.dll
 C:\Users\mezam\OneDrive\Documentos\ESAN\2025-2\Desarrollo de aplicaciones moviles\api_mobile\DamslaApi\bin\Debug\net9.0\runtimes\win-x86\native\libwinpthread-1.dll
 C:\Users\mezam\OneDrive\Documentos\ESAN\2025-2\Desarrollo de aplicaciones moviles\api_mobile\DamslaApi\bin\Debug\net9.0\runtimes\win-x86\native\qpdf.dll
+C:\Users\mezam\OneDrive\Documentos\ESAN\2025-2\Desarrollo de aplicaciones moviles\api_mobile\DamslaApi\obj\Debug\net9.0\DamslaApi.sourcelink.json

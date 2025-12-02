@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using DamslaApi.Services;
 using DamslaApi.Dtos.Auth;
+using System.Security.Claims;
 
 namespace DamslaApi.Controllers
 {
@@ -39,6 +41,24 @@ namespace DamslaApi.Controllers
                 message = "Usuario creado exitosamente",
                 user = new { user.Id, user.Nombre, user.Email }
             });
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            // Obtener el ID del usuario del token JWT
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized("Token inválido");
+
+            var success = await _auth.ChangePassword(userId, dto);
+
+            if (!success)
+                return BadRequest("La contraseña actual es incorrecta");
+
+            return Ok(new { message = "Contraseña cambiada exitosamente" });
         }
     }
 }

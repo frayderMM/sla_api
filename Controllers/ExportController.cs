@@ -17,6 +17,21 @@ namespace DamslaApi.Controllers
 
         // general + analista pueden exportar
         [Authorize]
+        [HttpGet("excel")]
+        public async Task<IActionResult> ExportarExcelActual()
+        {
+            var year = DateTime.Now.Year;
+            var archivo = await _export.ExportarExcelCompleto(year);
+
+            return File(
+                archivo,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Reporte_SLA_{year}.xlsx"
+            );
+        }
+
+        // general + analista pueden exportar (con año específico)
+        [Authorize]
         [HttpGet("excel/{year}")]
         public async Task<IActionResult> ExportarExcel(int year)
         {

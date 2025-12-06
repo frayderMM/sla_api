@@ -42,6 +42,7 @@ namespace DamslaApi.Services
                         FechaSolicitud = fechaSolicitud,
                         FechaIngreso = fechaIngreso,
                         TipoSlaId = tipo.Id,
+                        UsuarioId = userId,
                         CreadoPor = userId
                     };
 

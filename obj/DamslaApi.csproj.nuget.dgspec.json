@@ -60,7 +60,7 @@
             },
             "EPPlus": {
               "target": "Package",
-              "version": "[8.3.0, )"
+              "version": "[7.5.0, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",

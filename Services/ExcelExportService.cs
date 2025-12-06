@@ -3,6 +3,7 @@ using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using DamslaApi.Data;
 using System.Drawing;
+using Microsoft.EntityFrameworkCore;
 
 namespace DamslaApi.Services
 {
@@ -11,6 +12,12 @@ namespace DamslaApi.Services
         private readonly SlaService _sla;
         private readonly DashboardService _dashboard;
         private readonly DamslaDbContext _db;
+
+        static ExcelExportService()
+        {
+            // Configurar licencia para EPPlus 8+ (no comercial)
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
 
         public ExcelExportService(SlaService sla, DashboardService dashboard, DamslaDbContext db)
         {
@@ -21,60 +28,58 @@ namespace DamslaApi.Services
 
         public async Task<byte[]> ExportarExcelCompleto(int year)
         {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             using var package = new ExcelPackage();
 
             // ================================================================
-            // HOJA 1: KPIs por Rol
+            // HOJA 1: KPIs por Rol - TODOS los roles de TODAS las fechas
             // ================================================================
             var wsKpi = package.Workbook.Worksheets.Add("KPIs");
 
-            // Logos (si existen)
-            try
-            {
-                var esanLogoPath = new FileInfo("wwwroot/logos/esan.png");
-                var tcsLogoPath = new FileInfo("wwwroot/logos/tcs.png");
+            // Encabezados en A1
+            wsKpi.Cells["A1"].Value = "Rol";
+            wsKpi.Cells["B1"].Value = "Total";
+            wsKpi.Cells["C1"].Value = "Cumplen";
+            wsKpi.Cells["D1"].Value = "No Cumplen";
+            wsKpi.Cells["E1"].Value = "% Cumplimiento";
 
-                if (esanLogoPath.Exists)
-                {
-                    var pic1 = wsKpi.Drawings.AddPicture("ESAN", esanLogoPath);
-                    pic1.SetPosition(0, 0, 0, 0);
-                    pic1.SetSize(100, 100);
-                }
-
-                if (tcsLogoPath.Exists)
-                {
-                    var pic2 = wsKpi.Drawings.AddPicture("TCS", tcsLogoPath);
-                    pic2.SetPosition(0, 0, 3, 0);
-                    pic2.SetSize(100, 100);
-                }
-            }
-            catch { /* Si falta el logo, no cae el proceso */ }
-
-            // Título
-            wsKpi.Cells["A6"].Value = $"KPIs de SLA – {year}";
-            wsKpi.Cells["A6"].Style.Font.Bold = true;
-            wsKpi.Cells["A6"].Style.Font.Size = 16;
-
-            // Encabezados
-            wsKpi.Cells["A8"].Value = "Rol";
-            wsKpi.Cells["B8"].Value = "Total";
-            wsKpi.Cells["C8"].Value = "Cumplen";
-            wsKpi.Cells["D8"].Value = "No Cumplen";
-            wsKpi.Cells["E8"].Value = "% Cumplimiento";
-
-            using (var range = wsKpi.Cells["A8:E8"])
+            using (var range = wsKpi.Cells["A1:E1"])
             {
                 range.Style.Font.Bold = true;
                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                 range.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             }
 
-            var resumen = await _dashboard.GetDashboardMensual(year);
+            // Consulta DIRECTA a la BD sin filtros de año
+            var todasSolicitudes = await _db.Solicitudes
+                .Include(s => s.TipoSla)
+                .Where(s => s.FechaIngreso.HasValue) // Solo las que tienen fecha de ingreso
+                .ToListAsync();
 
-            int row = 9;
-            foreach (var r in resumen)
+            var resumenPorRol = todasSolicitudes
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.Rol) ? "(Sin Rol)" : x.Rol)
+                .Select(g => new
+                {
+                    Rol = g.Key,
+                    Total = g.Count(),
+                    Cumplen = g.Count(x => {
+                        var dias = (x.FechaIngreso!.Value - x.FechaSolicitud).Days;
+                        return dias <= x.TipoSla.TiempoRespuesta;
+                    }),
+                    NoCumplen = g.Count(x => {
+                        var dias = (x.FechaIngreso!.Value - x.FechaSolicitud).Days;
+                        return dias > x.TipoSla.TiempoRespuesta;
+                    }),
+                    Porcentaje = g.Count() > 0 ? Math.Round((double)g.Count(x => {
+                        var dias = (x.FechaIngreso!.Value - x.FechaSolicitud).Days;
+                        return dias <= x.TipoSla.TiempoRespuesta;
+                    }) / g.Count() * 100, 2) : 0
+                })
+                .OrderBy(x => x.Rol)
+                .ToList();
+
+            int row = 2;
+            foreach (var r in resumenPorRol)
             {
                 wsKpi.Cells[row, 1].Value = r.Rol;
                 wsKpi.Cells[row, 2].Value = r.Total;

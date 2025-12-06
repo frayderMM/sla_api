@@ -4,11 +4,14 @@ namespace DamslaApi.Utils
 {
     public class ExcelParser
     {
+        static ExcelParser()
+        {
+            // Configurar licencia para EPPlus 8+ (no comercial)
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        }
+
         public static List<Dictionary<string, string>> ReadExcel(Stream stream)
         {
-            // Configurar licencia para EPPlus (no comercial)
-            OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-
             using var package = new ExcelPackage(stream);
             var worksheet = package.Workbook.Worksheets[0];
 

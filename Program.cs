@@ -9,6 +9,9 @@ using DamslaApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Cargar variables de entorno (GROQ_API_KEY, GROQ_MODEL)
+builder.Configuration.AddEnvironmentVariables();
+
 // Configurar DbContext con PostgreSQL (Aurora) - Variable de entorno para Render
 var connectionString = builder.Configuration.GetValue<string>("CONN_STR") ?? 
                        builder.Configuration.GetConnectionString("DefaultConnection");
@@ -32,6 +35,8 @@ builder.Services.AddScoped<AlertasService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ExcelExportService>();
 builder.Services.AddScoped<DashboardPrincipalService>();
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<ChatService>();
 
 // Registrar tarea en segundo plano para alertas automáticas
 builder.Services.AddHostedService<BackgroundAlertTask>();

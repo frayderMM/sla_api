@@ -6,6 +6,7 @@ using DamslaApi.Data;
 using DamslaApi.Services;
 using DamslaApi.Utils;
 using DamslaApi.Models;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +82,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Configurar límites de carga de archivos
+builder.Services.Configure<FormOptions>(o =>
+{
+    o.MultipartBodyLengthLimit = 30_000_000; // 30 MB
+    o.ValueLengthLimit = int.MaxValue;
+    o.MultipartHeadersLengthLimit = int.MaxValue;
+});
+
+// Configurar Kestrel para aceptar archivos grandes
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 30_000_000; // 30 MB
+});
+
 var app = builder.Build();
 
 // Poblar datos iniciales
@@ -144,6 +159,14 @@ app.UseSwaggerUI();
 // app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+
+// Habilitar buffering para streams (necesario para Render)
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    await next();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

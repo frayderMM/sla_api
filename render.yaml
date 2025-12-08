@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: sla-api
+    env: dotnet
+    region: oregon
+    buildCommand: "dotnet publish -c Release -o out"
+    startCommand: "dotnet out/DamslaApi.dll"
+    autoDeploy: true
+    plan: free
+    maxUploadSize: 25MB
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:$PORT
+      - key: CONN_STR
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+
+databases:
+  - name: postgres-db
+    databaseName: sla_db
+    user: sla_user
+    plan: free

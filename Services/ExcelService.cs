@@ -26,7 +26,16 @@ namespace DamslaApi.Services
                     string rol = row["Rol"];
                     string tipoSla = row["TipoSla"];
                     DateTime fechaSolicitud = DateTime.Parse(row["FechaSolicitud"]);
-                    DateTime fechaIngreso = DateTime.Parse(row["FechaIngreso"]);
+                    DateTime? fechaIngreso = string.IsNullOrWhiteSpace(row["FechaIngreso"]) 
+                        ? null 
+                        : DateTime.Parse(row["FechaIngreso"]);
+
+                    // Convertir a UTC para PostgreSQL
+                    fechaSolicitud = DateTime.SpecifyKind(fechaSolicitud, DateTimeKind.Utc);
+                    if (fechaIngreso.HasValue)
+                    {
+                        fechaIngreso = DateTime.SpecifyKind(fechaIngreso.Value, DateTimeKind.Utc);
+                    }
 
                     // Validar Tipo SLA
                     var tipo = await _db.TiposSla.FirstOrDefaultAsync(t => t.Codigo == tipoSla);

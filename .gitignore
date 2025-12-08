@@ -221,4 +221,6 @@ ASALocalRun/
 .idea/
 
 # appsettings with sensitive data (keep template)
+appsettings.json
 appsettings.Development.json
+appsettings.Production.json

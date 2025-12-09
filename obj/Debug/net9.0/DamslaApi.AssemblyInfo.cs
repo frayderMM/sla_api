@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DamslaApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fba0a4c77a28aef1bf258ffdf2e8e6ea615117ed")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7c264d7046c8e0450262d17eecc7576499b2e10")]
 [assembly: System.Reflection.AssemblyProductAttribute("DamslaApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DamslaApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

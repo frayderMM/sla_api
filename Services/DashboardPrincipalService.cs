@@ -93,11 +93,14 @@ public class DashboardPrincipalService
             .ThenBy(x => x.Mes)
             .ToList();
 
-        var historico = porMes.Select(m => new PuntoHistoricoDto
-        {
-            Periodo = $"{m.Año}-{m.Mes:D2}",
-            Porcentaje = m.Total > 0 ? Math.Round((double)m.Cumple / m.Total * 100, 1) : 0
-        }).ToList();
+        var historico = porMes
+            .Select(m => new PuntoHistoricoDto
+            {
+                Periodo = $"{m.Año}-{m.Mes:D2}",
+                Porcentaje = m.Total > 0 ? Math.Round((double)m.Cumple / m.Total * 100, 1) : 0
+            })
+            .Where(p => p.Porcentaje > 0) // Filtrar meses con 0% de cumplimiento
+            .ToList();
 
         return new HistoricoDto
         {

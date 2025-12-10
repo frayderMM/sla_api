@@ -24,6 +24,7 @@ builder.Services.AddDbContext<DamslaDbContext>(options =>
 // Registrar servicios
 builder.Services.AddScoped<SlaService>();
 builder.Services.AddScoped<SolicitudesService>();
+builder.Services.AddScoped<TiposSlaService>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
